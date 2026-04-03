@@ -1,5 +1,13 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+import logging
+from typing import List
+
+logging.basicConfig(
+    format="%(message)s",
+    level=logging.INFO,
+    handlers=[logging.StreamHandler()],
+)
 
 
 @dataclass
@@ -8,55 +16,62 @@ class Book:
     author: str
     year: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.title} by {self.author} {self.year}"
 
 
 class LibraryInterface(ABC):
     @abstractmethod
-    def add_book(self, title, author, year): ...
+    def add_book(self, book: Book) -> None: ...
+
     @abstractmethod
-    def remove_book(self, title): ...
+    def remove_book(self, title: str) -> None: ...
+
     @abstractmethod
-    def show_books(self): ...
+    def get_books(self) -> List[Book]: ...
 
 
 class Library(LibraryInterface):
     def __init__(self):
-        self.books: list[Book] = []
+        self.books: List[Book] = []
 
-    def add_book(self, title, author, year):
+    def add_book(self, book: Book) -> None:
 
-        self.books.append(Book(title, author, int(year)))
+        self.books.append(book)
 
-    def remove_book(self, title):
+    def remove_book(self, title: str) -> None:
         for book in self.books:
 
             if book.title == title:
                 self.books.remove(book)
                 break
 
-    def show_books(self):
-        for book in self.books:
-            print(f"Title: {book.title}, Author: {book.author}, Year: {book.year}")
+    def get_books(self) -> List[Book]:
+        return self.books
 
 
 class LibraryManager:
+
     def __init__(self, library: LibraryInterface):
         self.library = library
 
-    def add_book(self, title, author, year):
-        self.library.add_book(title, author, year)
+    def add_book(self, title: str, author: str, year: int) -> None:
+        book = Book(title, author, year)
+        self.library.add_book(book)
 
-    def remove_book(self, title):
+    def remove_book(self, title: str) -> None:
         self.library.remove_book(title)
 
-    def show_books(self):
-        self.library.show_books()
+    def show_books(self) -> None:
+        for book in self.library.get_books():
+            logging.info(
+                f"Title: {book.title}, Author: {book.author}, Year: {book.year}"
+            )
 
 
 def main():
     library = Library()
+
     manager = LibraryManager(library)
 
     while True:
@@ -76,7 +91,7 @@ def main():
             case "exit":
                 break
             case _:
-                print("Invalid command. Please try again.")
+                logging.info("Invalid command. Please try again.")
 
 
 if __name__ == "__main__":

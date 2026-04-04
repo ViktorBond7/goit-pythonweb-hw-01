@@ -69,10 +69,27 @@ class LibraryManager:
             )
 
 
+class LoggerLibrary(LibraryInterface):
+    def __init__(self, wrapped: LibraryInterface):
+        self.wrapped = wrapped
+
+    def add_book(self, book: Book) -> None:
+        logging.info(f"Adding book: {book}")
+        self.wrapped.add_book(book)
+
+    def remove_book(self, title: str) -> None:
+        logging.info(f"Removing book with title: {title}")
+        self.wrapped.remove_book(title)
+
+    def get_books(self) -> List[Book]:
+        logging.info("Getting list of books")
+        return self.wrapped.get_books()
+
+
 def main():
     library = Library()
-
-    manager = LibraryManager(library)
+    logger_library = LoggerLibrary(library)
+    manager = LibraryManager(logger_library)
 
     while True:
         command = input("Enter command (add, remove, show, exit): ").strip().lower()
